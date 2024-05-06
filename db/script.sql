@@ -11,19 +11,23 @@ CREATE TABLE herois(
     nivel INT NOT NULL,
     hp INT NOT NULL,
     ataque INT NOT NULL
-)
+);
 
 CREATE TABLE batalhas(
     id SERIAL PRIMARY KEY,
     heroi1_id INT NOT NULL,
     heroi2_id INT NOT NULL,
-    vencedor_id INT NOT NULL,
-    FOREIGN KEY (heroi1_id) REFERENCES herois(id)
-    FOREIGN KEY (heroi2_id) REFERENCES herois(id)
+    vencedor_id INT,
+    FOREIGN KEY (heroi1_id) REFERENCES herois(id),
+    FOREIGN KEY (heroi2_id) REFERENCES herois(id),
     FOREIGN KEY (vencedor_id) REFERENCES herois(id)
-)
+);
 
 --Inserção de dados teste
 
-INSERT INTO herois(nome, email) VALUES ('João', 'joaosantos@gmail.com');
-INSERT INTO herois(nome, email) VALUES ('M.Rita', 'mariarita@gmail.com');
+INSERT INTO herois(nome, poder, nivel, hp, ataque) VALUES ('Deadpool', 'Fator de Cura', 1, 999, 198);
+INSERT INTO herois(nome, poder, nivel, hp, ataque) VALUES ('Wolverine', 'Garras de Adamantium', 1, 901, 212);
+INSERT INTO herois(nome, poder, nivel, hp, ataque) VALUES ('Motoqueiro Fantasma', 'Correntes de Fogo', 1, 530, 177);
+INSERT INTO herois(nome, poder, nivel, hp, ataque) VALUES ('Venom', 'Simbionte', 1, 411, 200);
+
+
