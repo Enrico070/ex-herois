@@ -106,22 +106,49 @@ app.put('/herois/:id', async (req, res) => {
       }
     } catch (error) {
       console.error('Erro ao obter herói por ID:', error);
+
       res.status(500).send('Erro ao obter herói por ID');
     }
   });
 
   // Parte das ações da tabela batalhas
 
+ 
+
   app.get('/batalhas/:heroi1_id/:heroi2_id', async (req, res) => {
+    const { heroi1_id, heroi2_id } = req.params;
     try {
-      const { heroi1_id, heroi2_id, vencedor_id} = req.params;
-      const batalha = await pool.query('SELECT * FROM herois WHERE id = $1', [id]);
-     
+        const resultado1 = await pool.query('SELECT * FROM herois WHERE id = $1', [heroi1_id]);
+        const resultado2 = await pool.query('SELECT * FROM herois WHERE id = $1', [heroi2_id]);
+
+        const hero1 = resultado1.rows[0];
+        const hero2 = resultado2.rows[0];
+
+        let vencedor = null;
+        let perdedor = null;
+
+        if (hero1.hp - hero2.ataque < hero2.hp - hero1.ataque) {
+            vencedor = hero2;
+            perdedor = hero1;
+            await pool.query('INSERT INTO batalhas (heroi1_id, heroi2_id, vencedor_id) VALUES ($1, $2, $3)', [heroi1_id, heroi2_id, heroi2_id]);
+            await pool.query('UPDATE herois SET nivel = nivel + 1 WHERE id = $1', [heroi2_id]);
+            res.json({ mensagem: 'O herói ' + vencedor.nome + ' venceu a batalha!', vencedor: vencedor, perdedor: perdedor });
+        } else if (hero1.hp - hero2.ataque > hero2.hp - hero1.ataque) {
+            vencedor = hero1;
+            perdedor = hero2;
+            await pool.query('INSERT INTO batalhas (heroi1_id, heroi2_id, vencedor_id) VALUES ($1, $2, $3)', [heroi1_id, heroi2_id, heroi1_id]);
+            await pool.query('UPDATE herois SET nivel = nivel + 1 WHERE id = $1', [heroi1_id]);
+            res.json({ mensagem: 'O herói ' + vencedor.nome + ' venceu a batalha!', vencedor: vencedor, perdedor: perdedor });
+        } else {
+            await pool.query('INSERT INTO batalhas (heroi1_id, heroi2_id, vencedor_id) VALUES ($1, $2, $3)', [heroi1_id, heroi2_id, null]);
+            res.json({ mensagem: 'Grande batalha, e o resultado foi empate!', empate: true });
+        }
     } catch (error) {
-      console.error('Erro ao executar batalha:', error);
-      res.status(500).send('Erro ao executar batalha');
+        console.error('Erro ao executar batalha:', error);
+        res.status(500).send('Erro ao executar batalha');
     }
-  });
+});
+
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}🚀`);
